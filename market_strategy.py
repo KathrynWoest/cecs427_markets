@@ -4,7 +4,7 @@ import sys
 import file_i as fi
 #import plot
 #import interactive as inact
-#import analysis
+import analysis
 
 
 def main():
@@ -20,7 +20,7 @@ def main():
     user_graph = fi.parse_graph(args[1])
 
     # calculate preference-seller graph and conduct analysis
-    #round_results = analysis.analysis(user_graph)
+    round_results = analysis.analysis(user_graph)
 
     # call the plotting function
     #if "--plot" in args:
