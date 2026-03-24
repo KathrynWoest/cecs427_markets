@@ -41,7 +41,7 @@ def build_preference_seller(graph):
     try:
         # begin constructing the preference-seller graph by adding all the nodes to the new graph
         pref_sell = nx.Graph()
-        pref_sell.add_nodes_from(graph.nodes)
+        pref_sell.add_nodes_from(graph.nodes(data=True))
         
         # go through each buyer and determine what they value every seller's node at (value - price)
         for node in buyers:
