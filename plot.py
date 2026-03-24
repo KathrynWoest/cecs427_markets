@@ -120,7 +120,7 @@ def plot(graph):
     fig = go.Figure(data=[edge_trace, edge_hover_trace, edge_label_trace, node_trace])
 
     fig.update_layout(
-        title="Bipartite market graph",
+        title="Bipartite Market Graph",
         showlegend=False,
         hovermode="closest",
         xaxis=dict(showgrid=False, zeroline=False, visible=False),
@@ -132,6 +132,6 @@ def plot(graph):
     # Generating figure
     fig.show()
 
-    file_path = os.path.abspath("graph.html")
-    fig.write_html("graph.html", auto_open=False)
+    file_path = os.path.abspath("market_graph.html")
+    fig.write_html("market_graph.html", auto_open=False)
     webbrowser.open("file://" + file_path)
