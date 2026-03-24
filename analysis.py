@@ -1,4 +1,5 @@
 import networkx as nx
+import copy
 
 
 def build_preference_seller(graph):
@@ -15,7 +16,7 @@ def build_preference_seller(graph):
 
     # determine what values are used to distinguish buyers and sellers
     for node, price in graph.nodes(data="price"):
-        if price != None:
+        if price is not None:
             seller_group = graph.nodes[node]["bipartite"]
             sell = True
         else:
@@ -60,15 +61,21 @@ def build_preference_seller(graph):
         for k, v in node_values.items():
             if v == max_value:
                 pref_sell.add_edge(k, node)
+        
+    for node in pref_sell.nodes:
+        pref_sell.nodes[node]["matched"] = False
+
+    for u, v in pref_sell.edges:
+        pref_sell.edges[u, v]["matched"] = False
 
     # return the preference-seller graph, buyers, and sellers
     return pref_sell, buyers, sellers
 
 
-def reconstruct_path(parents, end):
+def reconstruct_path(ps_graph, parents, end):
     """Function that takes a BFS-search and reconstructs the augmented path
     Inputs: the dict that stores all the traversed nodes and their parents and the ending unmatched node to end the augmented path on
-    Returns: the augmented path, formatted to start at the initial unmatched node and end at the input end"""
+    Returns: True"""
     
     path = []
     # while we haven't found the original unmatched node (the buyer)
@@ -76,13 +83,35 @@ def reconstruct_path(parents, end):
         # add the current node, and load its parent
         path.append(end)
         end = parents[end]
-    return path[::-1]
+    
+    path.reverse()
+
+    # iterate through the augmented path, switching the matched/unmatched edges
+
+    for i in range(len(path) - 1):
+        edge = (path[i], path[i + 1])
+        if ps_graph.edges[edge].get("matched"):
+            ps_graph.edges[edge]["matched"] = False
+        else:
+            ps_graph.edges[edge]["matched"] = True
+    
+    # now reset all the nodes too
+    for node in ps_graph.nodes():
+        ps_graph.nodes[node]["matched"] = False
+    
+    for u, v in ps_graph.edges():
+        if ps_graph.edges[(u, v)].get("matched"):
+            ps_graph.nodes[u]["matched"] = True
+            ps_graph.nodes[v]["matched"] = True
+
+    
+    return True
 
 
-def bfs_search(ps_graph, starter):
+def bfs_search(ps_graph, starter, sellers):
     """Function that conducts the BFS-search (using the 'unmatched edges -> matched edge' pattern we learned in class)
     Inputs: the preference-seller graph and an unmatched buyer to start the search
-    Returns: EITHER 'False to indicate to path found' OR 'the augmented path by calling `reconstruct_path()`'"""
+    Returns: EITHER 'False to indicate no path found and the visited nodes' OR 'True to indicate path found and None (no visited nodes need to be tracked)'"""
 
     # initialize the BFS search, the list of visited nodes, the iterator, and the dictionary to keep track of parents
     bfs_path = [[starter]]
@@ -104,15 +133,16 @@ def bfs_search(ps_graph, starter):
                     else:
                         other = v
                     # if the node the edge is connecting to hasn't been visited, add to the traversal
-                    if other not in visited:
+                    if not ps_graph.edges[(u, v)].get("matched", False) and other not in visited:
                         next.append(other)
                         visited.append(other)
                         parent_tracker[other] = next_node
 
                         # we are on an even layer. if we find a non-matched node at this point, it indicates an augmented path
                         # call `reconstruct_path()` to find and return the augmented path
-                        if "matched" not in ps_graph.nodes[other]:
-                            return reconstruct_path(parent_tracker, other)
+                        if other in sellers and not ps_graph.nodes[other].get("matched", False):
+                            reconstruct_path(ps_graph, parent_tracker, other)
+                            return True, None
             
             # if we actually added new nodes to this layer, then add them and iterate to the next layer
             if len(next) > 0:
@@ -134,7 +164,7 @@ def bfs_search(ps_graph, starter):
                     else:
                         other = v
                     # if the node the edge is connecting to hasn't been visited and is the matching edge, add to the traversal
-                    if "matched" in ps_graph.edges[(u, v)] and other not in visited:
+                    if ps_graph.edges[(u, v)].get("matched", False) and other not in visited:
                         next.append(other)
                         visited.append(other)
                         parent_tracker[other] = next_node
@@ -148,54 +178,80 @@ def bfs_search(ps_graph, starter):
                 break
 
     # return false to indicate no augmented path was found and that prices should be increased in the sellers
-    return False   
+    return False, visited   
 
 
 def analysis(graph):
     """Function that controls the overall logic of the perfect matching process utilizing preference-seller graphs, augmented paths, and constricted sets
     Inputs: the user graph
     Returns: printed description of the perfect matching and a dict that tracks each step of the process"""
-    
-    ps_graph, buyers, sellers = build_preference_seller(graph)
-    
-    # create initial matching
-    for buyer in buyers:
-        buyer_matched = False
-        edges = ps_graph.edges(buyer)
-        for u, v in edges:
-            if u != buyer:
-                seller = u
-            else:
-                seller = v
 
-            if "matched" not in ps_graph.nodes[seller]:
-                ps_graph.nodes[seller]["matched"] = buyer
-                ps_graph.nodes[buyer]["matched"] = seller
-                ps_graph.edges[(u, v)]["matched"] = True
-                buyer_matched = True
+    perfect_matching = False
+    graph_tracker = []
 
-            if buyer_matched:
+    while not perfect_matching:
+        # build the preference-seller graph
+        ps_graph, buyers, sellers = build_preference_seller(graph)
+        
+        # create initial matching by matching buyers with first seller they can connect to
+        for buyer in buyers:
+            buyer_matched = False
+            edges = ps_graph.edges(buyer)
+            for u, v in edges:
+                if u != buyer:
+                    seller = u
+                else:
+                    seller = v
+
+                if not ps_graph.nodes[seller].get("matched", False):
+                    ps_graph.nodes[seller]["matched"] = True
+                    ps_graph.nodes[buyer]["matched"] = True
+                    ps_graph.edges[(u, v)]["matched"] = True
+                    buyer_matched = True
+
+                if buyer_matched:
+                    break
+        
+        result = True
+        while result:
+            # check for unmatched buyers
+            unmatched = False
+            starter = None
+
+            for buyer in buyers:
+                if not ps_graph.nodes[buyer].get("matched", False):
+                    starter = buyer
+                    unmatched = True
+                    break
+
+            # if all the buyers are matched, we found the perfect matching!
+            if not unmatched:
+                perfect_matching = True
+                graph_tracker.append(copy.deepcopy(ps_graph))
                 break
-    
-    unmatched = False
-    starter = None
-    # check for unmatched nodes
-    for buyer in buyers:
-        if "matched" not in ps_graph.nodes[buyer]:
-            starter = buyer
-            unmatched = True
-            break
+            
+            # else, not all matched, so determine if an augmented path exists
+            result, visited = bfs_search(ps_graph, starter, sellers)
+        
+            # there's no augmented path, just up the prices of the constricted set sellers and repeat
+            if result == False:
+                graph_tracker.append(copy.deepcopy(ps_graph))
+                for seller in sellers:
+                    if seller in visited:
+                        graph.nodes[seller]["price"] += 1
+                break
 
-    # if it's not matched, see if there IS a way to make a match work. otherwise, constricted set where S=matched sellers, N(S)=all buyers
-    if unmatched:
-        result = bfs_search(ps_graph, starter)
+    # print formatted results
+    print("-----")
+    print("Perfect matching has been found:")
+    for u, v, match in ps_graph.edges(data="matched"):
+        if match:
+            if u in sellers:
+                print(f"Seller {u} matched to buyer {v}.")
+            else:
+                print(f"Seller {v} matched to buyer {u}.")
+    print("-----")
     
-    # there's no augmented path, just up the prices of the constricted set sellers and repeat
-    if result == False:
-        for seller in sellers:
-            if "matched" in ps_graph.nodes[seller]:
-                ps_graph.nodes[seller]["price"] += 1
-
-    # there's an augmented path. now implement logic here to reverse the path and search again to see if the matching set can increase
-    else:
-        pass
+    # return a list of all the preference-seller graphs found with maximum matching
+    return graph_tracker
+    
