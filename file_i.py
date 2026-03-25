@@ -18,7 +18,7 @@ def parse_graph(file_name):
         if submitted_graph.number_of_nodes == 0 or submitted_graph.number_of_edges == 0:
             raise Exception("Program terminated because the graph has no nodes and/or no edges.")
         
-        # check if any of the edges don't have bipartite value
+        # check if any of the nodes don't have bipartite value
         for node, bi in submitted_graph.nodes(data="bipartite"):
             if bi == None:
                 raise Exception(f"Program terminated because node '{node}' doesn't have a bipartite attribute.")
