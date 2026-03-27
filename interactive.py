@@ -40,7 +40,7 @@ def _get_groups(graph):
 
 def _find_constricted_sellers(ps_graph, buyers, sellers):
     """
-    Helper function to recompute the visited set from a stored preference-seller graph.
+    Helper function to recompute the constricted set from a stored preference-seller graph.
 
     Parameters
         - ps_graph (nx.Graph): the preference-seller graph
@@ -101,7 +101,7 @@ def _find_constricted_sellers(ps_graph, buyers, sellers):
 
 def interactive(graph, round_results):
     """
-    Build an animated Plotly figure showing the results of every round. Includes a scrubbing bar to 
+    Builds an animated Plotly figure showing the results of every round in the market process. Includes a scrubbing bar to 
     see each round's results, and a pause/play button to play the animation on a loop.
 
     Parameters
