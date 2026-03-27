@@ -2,8 +2,8 @@
 
 import sys
 import file_i as fi
-#import plot
-#import interactive as inact
+import plot
+import interactive as inact
 import analysis
 
 
@@ -23,11 +23,11 @@ def main():
     round_results = analysis.analysis(user_graph)
 
     # call the plotting function
-    #if "--plot" in args:
-        #plot.plot(user_graph)
+    if "--plot" in args:
+        plot.plot(user_graph)
 
     # call the interactive display function
-    #if "--interactive" in args:
-        #inact.interactive(user_graph, round_results)
+    if "--interactive" in args:
+        inact.interactive(user_graph, round_results)
 
 main()

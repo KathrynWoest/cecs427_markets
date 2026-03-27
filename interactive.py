@@ -1,3 +1,6 @@
+import networkx as nx
+import plotly.graph_objects as go
+
 
 def _get_groups(graph):
     """
