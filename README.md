@@ -29,4 +29,4 @@ Completed By: Kathryn Woest (030131541) and Grace Flores (030169163)
 Note: only one sample is provided, as we only received one test input `.gml` file and there are no other variable inputs.
 1. Command: `python3 market_strategy.py market.gml --plot --interactive`
 
-Outputs are annotated in this PDF: 
+Outputs are annotated in this PDF: https://pdflink.to/75874a19/
