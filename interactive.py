@@ -1,5 +1,7 @@
 import networkx as nx
 import plotly.graph_objects as go
+import os
+import webbrowser
 
 def _get_groups(graph):
     """
@@ -355,4 +357,9 @@ def interactive(graph, round_results):
         ]
     )
 
+    # Generating figure
+    file_path = os.path.abspath("market_graph_interactive.html")
+    fig.write_html("market_graph_interactive.html", auto_open=False)
+    webbrowser.open("file://" + file_path)
+    
     return fig
