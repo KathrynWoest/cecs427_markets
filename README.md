@@ -3,7 +3,7 @@ Completed By: Kathryn Woest (030131541) and Grace Flores (030169163)
 
 
 ## Usage Instructions
-**NOTE:** `plot.py` and `interactive.py` rely on a command that is not compatible with WSL. This command automatically opens up the graph's visualization. If you are unable to use a different terminal like Powershell, comment out `plot.py`'s line 145 and `interactive.py`'s line ### and instead manually open the generated `.html` files through your file explorer.
+**NOTE:** `plot.py` and `interactive.py` rely on a command that is not compatible with WSL. This command automatically opens up the graph's visualization. If you are unable to use a different terminal like Powershell, comment out `plot.py`'s line 145 and `interactive.py`'s line 363 and instead manually open the generated `.html` files through your file explorer.
 
 1. Clone this repo and open it on your IDE
 
@@ -22,7 +22,7 @@ Completed By: Kathryn Woest (030131541) and Grace Flores (030169163)
 3. **file_i.py:** Reads in the bipartite graph from the given `.gml` file, checks that the graph is not empty, ensures all nodes have a `bipartite` attribute, then returns the graph to the main program for analysis. A lot of code is reused from projects 1, 2, and 3.
 4. **analysis.py:** Contains four functions. `build_preference_seller()` builds the preference-seller graph by dividing up the nodes between buyers and sellers, determining the buyers valuations of each seller (value of buyer i - price of seller j), finding the maximum valuation (or valuations, if multiple are the same value), and adding edges between the buyers and their most valued seller(s). `reconstruct_path()` takes the result of the BFS-search through the graph with an augmented path and switches all the edges along the path from matched to unmatched and vice versa. `bfs_search()` starts from an unmatched buyer. On even layers, it adds all the unmatched edges to the traversal, and on odd layers, it adds all the matched edges. When the search finds a path that ends on an even layer (meaning it stops on an unmatched node), it calls `reconstruct_path()` as an augmented path was found. Finally, `analysis()` calls the appropriate functions to loop through, until perfect matching is found, building the preference-seller graph, finding an augmenting path and increasing the matching until maximum matching is found, and increasing the prices of the sellers in the constricted set. It then prints the results. It also returns a list of all of the preference-seller graphs with the maximum matches before they increased prices, ending with the perfect matching graph.
 5. **plot.py:** 
-6. **interactive.py:**
+6. **interactive.py:** 
 
 
 ## Example Command and Output
