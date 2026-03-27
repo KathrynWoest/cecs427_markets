@@ -3,7 +3,7 @@ Completed By: Kathryn Woest (030131541) and Grace Flores (030169163)
 
 
 ## Usage Instructions
-**NOTE:** `plot.py` relies on a command that is not compatible with WSL. This command automatically opens up the graph's visualization. If you are unable to use a different terminal like Powershell, comment out `plot.py`'s line 143 and instead manually open the generated `.html` file through your file explorer.
+**NOTE:** `plot.py` and `interactive.py` rely on a command that is not compatible with WSL. This command automatically opens up the graph's visualization. If you are unable to use a different terminal like Powershell, comment out `plot.py`'s line 145 and `interactive.py`'s line ### and instead manually open the generated `.html` files through your file explorer.
 
 1. Clone this repo and open it on your IDE
 
